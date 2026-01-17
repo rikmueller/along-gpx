@@ -1,65 +1,150 @@
 # osm_finder
 
-**osm_finder** ist ein modulares Python‑Tool, das OpenStreetMap‑Daten entlang eines GPX‑Tracks analysiert.  
-Es kombiniert:
+osm_finder is a modular Python tool that analyzes OpenStreetMap data along a GPX track.  
+It combines GPX processing, Overpass API queries, flexible OSM filters, Excel export, and interactive Folium maps.
 
-- GPX‑Verarbeitung  
-- Overpass‑API‑Abfragen  
-- flexible OSM‑Filter (inkl. Presets)  
-- Excel‑Export  
-- interaktive Folium‑Karten  
+## Features
+- Read GPX tracks and compute total distance
+- Run segmented Overpass queries along the track
+- Use flexible OSM include and exclude filters
+- Use preset filter profiles for common search types
+- Validate filters automatically
+- Export all results to Excel
+- Generate an interactive Folium map with track and markers
+- Fully configurable through YAML and command line arguments
+- Modular codebase for easy extension
 
-Das Projekt ist ideal für Bikepacking‑Routen, Wanderwege, Outdoor‑Planung, Campingplatz‑Suche oder jede Art von OSM‑Analyse entlang eines Tracks.
-
----
-
-## 🚀 Features
-
-- **GPX‑Track einlesen** und Streckenlänge berechnen  
-- **Segmentierte Overpass‑Abfragen** entlang des Tracks  
-- **Beliebige OSM‑Filter** (Include/Exclude)  
-- **Preset‑System** für häufige Suchtypen  
-- **Automatische Filtervalidierung**  
-- **Excel‑Export** aller gefundenen Objekte  
-- **Interaktive Folium‑Karte** mit Track + Markern  
-- **Vollständig konfigurierbar über YAML + CLI**  
-- **Modulare Codebasis** für einfache Erweiterbarkeit  
-
----
-
-
-
-## 📁 Projektstruktur
+## Project Structure
 osm_finder/
-├── main.py
-├── config.yaml
-├── presets.yaml
-├── README.md
-└── core/
-├── init.py
-├── cli.py
-├── config.py
-├── presets.py
-├── overpass.py
-├── gpx_processing.py
-├── filtering.py
-├── folium_map.py
-└── export.py
+  main.py
+  config.yaml
+  presets.yaml
+  README.md
+  core/
+    cli.py
+    config.py
+    presets.py
+    overpass.py
+    gpx_processing.py
+    filtering.py
+    folium_map.py
+    export.py
 
-
----
-
-## 🛠️ Installation
-
-### 1. Repository klonen
-
+## Installation
+Clone the repository:
 ```bash
-git clone https://github.com/<DEIN_USERNAME>/osm_finder.git
+git clone https://github.com/your_username/osm_finder.git
 cd osm_finder
-pip install -r requirements.txt
 ```
 
-⚙️ Konfiguration
-Alle Standard‑Einstellungen findest du in:
+Install dependencies:
+pip install -r requirements.txt
 
-config.yaml
+Or install manually:
+pip install gpxpy shapely pyproj requests tqdm folium pyyaml pandas
+
+Configuration
+All default settings are stored in config.yaml.
+
+Example config:
+project:
+  name: output
+  output_path: ./
+
+input:
+  gpx_file: track.gpx
+
+search:
+  radius_km: 5
+  step_km: null
+  include:
+    - tourism=camp_site
+  exclude:
+    - tents=no
+    - camp_site:tent=no
+
+map:
+  zoom_start: 10
+  track_color: blue
+  marker_colors:
+    near: green
+    mid: orange
+    far: red
+
+overpass:
+  retries: 5
+  servers:
+    - https://overpass-api.de/api/interpreter
+    - https://overpass.kumi.systems/api/interpreter
+    - https://lz4.overpass-api.de/api/interpreter
+
+presets_file: presets.yaml
+
+Presets
+The file presets.yaml contains predefined filter profiles.
+
+Example presets:
+presets:
+  camp_basic:
+    include:
+      - tourism=camp_site
+    exclude:
+      - tents=no
+      - camp_site:tent=no
+
+  camp_and_caravan:
+    include:
+      - tourism=camp_site
+      - tourism=caravan_site
+
+  shelters:
+    include:
+      - amenity=shelter
+
+  drinking_water:
+    include:
+      - amenity=drinking_water
+
+Usage
+Run with default configuration:
+python3 main.py
+
+Override GPX file:
+python3 main.py --gpx-file Tag1.gpx
+
+Use a preset:
+python3 main.py --preset camp_and_caravan
+
+Combine presets:
+python3 main.py --preset camp_basic --preset drinking_water
+
+Add include filters:
+python3 main.py --include amenity=toilets
+
+Add exclude filters:
+python3 main.py --exclude fee=yes
+
+Full example:
+python3 main.py --preset camp_basic --include amenity=toilets --exclude fee=yes --gpx-file Tag1.gpx --project-name Tour2025
+
+Output
+The tool generates two files:
+<project_name>.xlsx
+<project_name>.html
+
+Both files are saved in the directory defined by project.output_path.
+
+Technical Notes
+- Overpass queries are executed in segments along the track
+- Distances are computed using WGS84 geodesic calculations
+- Track projection uses EPSG 3857
+- Marker colors depend on distance to the track
+- Filters are validated to ensure key=value format
+- Duplicate results are removed
+
+Contributing
+Pull requests are welcome.  
+Please open an issue if you find bugs or want to request features.
+
+License
+You may add a license of your choice here.
