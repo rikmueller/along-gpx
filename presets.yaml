@@ -1,0 +1,26 @@
+presets:
+  camp_basic:
+    include:
+      - "tourism=camp_site"
+    exclude:
+      - "tents=no"
+      - "camp_site:tent=no"
+
+  camp_and_caravan:
+    include:
+      - "tourism=camp_site"
+      - "tourism=caravan_site"
+    exclude:
+      - "tents=no"
+
+  shelters:
+    include:
+      - "amenity=shelter"
+
+  drinking_water:
+    include:
+      - "amenity=drinking_water"
+
+  wild_camping_spots:
+    include:
+      - "camp_site=wild"
