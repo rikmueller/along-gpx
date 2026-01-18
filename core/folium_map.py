@@ -1,5 +1,6 @@
 import os
 import folium
+from folium.plugins import LocateControl
 from datetime import datetime
 
 
@@ -17,6 +18,9 @@ def build_folium_map(df, track_points, output_path: str, project_name: str, map_
         location=[start_lat, start_lon],
         zoom_start=map_cfg.get("zoom_start", 10),
     )
+
+    # Add locate control button
+    LocateControl(position='topleft').add_to(m)
 
     # Track line
     folium.PolyLine(

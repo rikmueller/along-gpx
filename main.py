@@ -71,7 +71,7 @@ def main():
 
     print(f"✅ Done! {len(df)} objects found.")
     print(f"📄 Excel: {excel_path}")
-    print(f"🗺️ Map: {html_path}")
+    print(f"🌍 Map: {html_path}")
 
 
 if __name__ == "__main__":
