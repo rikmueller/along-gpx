@@ -1,49 +1,8 @@
-# Docker Deployment Guide
+# Web API Reference & Operations
 
-Run AlongGPX as a containerized REST API with Docker and Docker Compose.
+Advanced Docker operations, production deployment, and API details for AlongGPX.
 
----
-
-## Quick Start (2 minutes)
-
-**Prerequisites:** Docker ≥ 20.10, Docker Compose ≥ 1.29
-
-1. Start the container:
-   ```bash
-   cd docker
-   docker-compose up -d
-   ```
-
-2. Verify it's running:
-   ```bash
-   curl http://localhost:5000/health
-   ```
-   Response: `{"status": "healthy", "service": "AlongGPX"}`
-
-3. Upload and process a GPX file:
-   ```bash
-   curl -F "file=@../data/input/track.gpx" \
-        -F "project_name=MyTrip" \
-        -F "radius_km=5" \
-        http://localhost:5000/api/process
-   ```
-
-Done! Excel and HTML map are saved to `../data/output/`.
-
----
-
-## How It Works
-
-AlongGPX runs a Flask web API in a Docker container. You upload GPX files and receive JSON responses with links to Excel and interactive Folium maps.
-
-**Volume mounts (default):**
-- `../data/input/` (read-only) ← GPX files for processing
-- `../data/output/` (read-write) ← Generated Excel/HTML results
-
-**Configuration hierarchy** (highest → lowest):
-1. Web API form parameters (`-F "radius_km=10"`)
-2. Environment variables (`.env` file)
-3. `config.yaml` defaults
+**Getting started?** See [quickstart-docker.md](quickstart-docker.md) for setup and configuration.
 
 ---
 
@@ -96,103 +55,7 @@ curl -F "file=@track.gpx" \
 
 ---
 
-## Configuration
-
-Docker automatically mounts `../config.yaml` from the repo root. Configuration uses this hierarchy (highest → lowest):
-
-1. **Environment variables** (optional) – override specific values
-2. **config.yaml** (default, auto-mounted) – persistent settings
-
-### Default: Use config.yaml
-
-Edit `config.yaml` for permanent defaults, then restart:
-```bash
-docker-compose up -d
-```
-
-### Optional: Override with Environment Variables
-
-For temporary overrides (without editing config.yaml), set environment variables.
-
-**Method A: .env file** (recommended for multiple overrides)
-Create `docker/.env`:
-```bash
-ALONGGPX_RADIUS_KM=8
-ALONGGPX_BATCH_KM=60
-ALONGGPX_TIMEZONE=America/New_York
-```
-
-**Method B: docker-compose.yml**
-```yaml
-services:
-  alonggpx:
-    environment:
-      - ALONGGPX_RADIUS_KM=8
-      - ALONGGPX_BATCH_KM=60
-```
-
-**All available environment variables:**
-
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `ALONGGPX_RADIUS_KM` | Search radius (km) | 5 |
-| `ALONGGPX_STEP_KM` | Query point spacing | 60% of radius |
-| `ALONGGPX_BATCH_KM` | Overpass batch size | 50 |
-| `ALONGGPX_OVERPASS_RETRIES` | Retry attempts | 3 |
-| `ALONGGPX_TIMEZONE` | Timestamp timezone | UTC |
-| `FLASK_ENV` | Flask mode (production/development) | production |
-
-See [docs/quickstart-docker.md](quickstart-docker.md) for initial setup and configuration.
-
----
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| **Port 5000 in use** | Change in docker-compose.yml: `ports: ["5001:5000"]` |
-| **"Connection refused" on /api/process** | Wait 10s for health check; check logs: `docker-compose logs` |
-| **Upload fails / "No such file or directory"** | Ensure GPX file exists in `../data/input/`; check volume mounts in docker-compose.yml |
-| **No results from Overpass** | Verify filter syntax (`key=value`); test on [overpass-turbo.eu](https://overpass-turbo.eu/) |
-| **Overpass API timeout** | Increase `ALONGGPX_BATCH_KM` to reduce query load; check https://overpass-api.de/ status |
-| **Container won't start** | View logs: `docker logs alonggpx-web` (check for missing files or permission errors) |
-| **Can't write output files** | Check that `../data/output/` directory exists and is writable |
-
----
-
-## Viewing Logs
-
-```bash
-# Real-time logs
-docker-compose logs -f
-
-# Last 50 lines
-docker-compose logs --tail=50
-
-# With timestamps
-docker-compose logs --timestamps
-```
-
----
-
-## Manual Build (Advanced)
-
-If not using `docker-compose`, build and run manually:
-
-```bash
-cd docker
-docker build -t alonggpx:latest ..
-
-docker run -p 5000:5000 \
-  -v "$(pwd)/../data/input:/app/data/input:ro" \
-  -v "$(pwd)/../data/output:/app/data/output:rw" \
-  -e ALONGGPX_RADIUS_KM=5 \
-  alonggpx:latest
-```
-
----
-
-## Development & Testing
+## Operations & Debugging
 
 ### Test Locally (No Docker)
 ```bash
@@ -250,6 +113,26 @@ server {
 }
 ```
 
+---
+
+## Architecture & Design
+
+**Multi-stage Docker build:**
+- Base stage: Installs dependencies, builds wheels
+- Production stage: Copies only runtime (smaller image ~300MB)
+
+**Security:**
+- Runs as non-root user (`alonggpx`, UID 1000)
+- Input directory is read-only
+- No hardcoded credentials
+
+**Health checks:**
+- Polls `/health` endpoint every 30s
+- Fails fast if container becomes unhealthy
+
+**Volume mounts:**
+- `../data/input:ro` (read-only): Protects source GPX files
+- `../data/output:rw` (read-write): Container writes results to host
 
 ---
 
@@ -265,4 +148,30 @@ server {
 | `folium` | Interactive map generation |
 | `pandas` | DataFrame & Excel export |
 | `python-dotenv` | Environment variable loading |
+
+### Viewing Logs
+```bash
+# Real-time logs
+docker-compose logs -f
+
+# Last 50 lines
+docker-compose logs --tail=50
+
+# With timestamps
+docker-compose logs --timestamps
+```
+
+### Manual Build
+If not using `docker-compose`, build and run manually:
+
+```bash
+cd docker
+docker build -t alonggpx:latest ..
+
+docker run -p 5000:5000 \
+  -v "$(pwd)/../data/input:/app/data/input:ro" \
+  -v "$(pwd)/../data/output:/app/data/output:rw" \
+  -e ALONGGPX_RADIUS_KM=5 \
+  alonggpx:latest
+```
 

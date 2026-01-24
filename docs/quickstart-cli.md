@@ -35,7 +35,7 @@ pip install -r requirements-base.txt
 ```bash
 python3 cli/main.py --preset camp_basic
 ```
-Results are saved to `data/output/`.
+In this example, the sample GPX track is used. Results are saved to `data/output/`.
 
 ## 4) Customize
 ```bash
@@ -62,7 +62,7 @@ python3 cli/main.py --gpx-file ./data/input/track.gpx --preset drinking_water
 
 When CLI filters or presets are provided, `config.yaml:search.include/exclude` are ignored (CLI takes precedence).
 
-| Config Key | Env Variable | CLI Argument | Purpose |
+| config.yaml Key | Env Variable | CLI Argument | Purpose |
 |------------|--------------|--------------|---------|
 | `project.name` | `ALONGGPX_PROJECT_NAME` | `--project-name` | Output filename prefix and project identifier |
 | `project.output_path` | `ALONGGPX_OUTPUT_PATH` | `--output-path` | Directory for Excel and HTML outputs |
