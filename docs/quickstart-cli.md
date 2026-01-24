@@ -58,12 +58,29 @@ python3 cli/main.py --gpx-file ./data/input/track.gpx --preset drinking_water
 - Presets: `presets.yaml`
 - Precedence: CLI args > environment variables > config.yaml
 
-Optional environment overrides:
-```bash
-export ALONGGPX_RADIUS_KM=8
-export ALONGGPX_BATCH_KM=50
-python3 cli/main.py --preset camp_basic
-```
+### Config Reference
+
+When CLI filters or presets are provided, `config.yaml:search.include/exclude` are ignored (CLI takes precedence).
+
+| Config Key | Env Variable | CLI Argument | Purpose |
+|------------|--------------|--------------|---------|
+| `project.name` | `ALONGGPX_PROJECT_NAME` | `--project-name` | Output filename prefix and project identifier |
+| `project.output_path` | `ALONGGPX_OUTPUT_PATH` | `--output-path` | Directory for Excel and HTML outputs |
+| `project.timezone` | `ALONGGPX_TIMEZONE` | — | Timezone used for timestamps in output filenames |
+| `input.gpx_file` | `ALONGGPX_GPX_FILE` | `--gpx-file` | Path to the GPX file to analyze |
+| `search.radius_km` | `ALONGGPX_RADIUS_KM` | `--radius-km` | Search radius around the track (km) |
+| `search.step_km` | `ALONGGPX_STEP_KM` | `--step-km` | Spacing between Overpass query points (km); defaults to 60% of radius if null |
+| `search.include` | — | `--include` (repeatable) | OSM include filters `key=value` to find POIs |
+| `search.exclude` | — | `--exclude` (repeatable) | OSM exclude filters `key=value` to remove POIs |
+| Presets (from `presets.yaml`) | — | `--preset` (repeatable) | Load predefined include/exclude profiles |
+| `map.zoom_start` | `ALONGGPX_MAP_ZOOM_START` | — | Initial Folium map zoom level |
+| `map.track_color` | — | — | Color of the track polyline on the map |
+| `map.marker_color_palette` | — | — | Marker colors assigned by filter rank |
+| `map.default_marker_color` | — | — | Fallback marker color when no matching filter |
+| `overpass.batch_km` | `ALONGGPX_BATCH_KM` | — | Approx. km of track per Overpass API call (batching) |
+| `overpass.retries` | `ALONGGPX_OVERPASS_RETRIES` | — | Retry attempts for failed Overpass requests |
+| `overpass.servers` | — | — | List of Overpass API endpoints used for redundancy |
+| `presets_file` | — | — | Path to the presets file used by `--preset` |
 
 ## Common Presets
 ```bash
