@@ -29,7 +29,6 @@ AlongGPX/
 ├── docs/                   # Documentation
 │   ├── DOCKER.md          # Docker deployment guide
 │   ├── QUICKSTART.md      # Quick start guide
-│   └── IMPLEMENTATION.md  # Implementation details
 ├── data/
 │   ├── input/              # GPX files (default)
 │   └── output/             # Generated results
