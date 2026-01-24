@@ -12,9 +12,9 @@ Perfect for trip planning: bikepacking, hiking, road trips, or any adventure whe
 
 ## 🚀 Get Started
 
-- **New user?** → [QUICKSTART.md](docs/QUICKSTART.md) (5 minutes)
-- **Using Docker?** → [DOCKER.md](docs/DOCKER.md)
-- **Need help?** → See config files below
+- CLI quickstart → [docs/quickstart-cli.md](docs/quickstart-cli.md)
+- Docker quickstart → [docs/quickstart-docker.md](docs/quickstart-docker.md)
+- Detailed web API → [docs/DOCKER.md](docs/DOCKER.md)
 
 ## 📁 Project Structure
 

@@ -142,7 +142,7 @@ services:
 | `ALONGGPX_TIMEZONE` | Timestamp timezone | UTC |
 | `FLASK_ENV` | Flask mode (production/development) | production |
 
-See [QUICKSTART.md](QUICKSTART.md#configuration) for general configuration details.
+See [docs/quickstart-docker.md](quickstart-docker.md) for initial setup and configuration.
 
 ---
 

@@ -1,6 +1,9 @@
-# Quick Start Guide
+# Quick Start Index
 
-Get AlongGPX running in 5 minutes. Choose your path: **CLI** (local machine) or **Docker** (web API).
+Pick the guide for your setup:
+
+- CLI: [quickstart-cli.md](quickstart-cli.md)
+- Docker: [quickstart-docker.md](quickstart-docker.md)
 
 ---
 
@@ -110,15 +113,6 @@ List all presets and create custom ones in [presets.yaml](../presets.yaml).
 ## Configuration
 
 **For persistent settings**, edit [config.yaml](../config.yaml) in the repo root.
-
-**For one-time overrides**, use CLI arguments (see `--help`) or environment variables:
-
-```bash
-export ALONGGPX_RADIUS_KM=8
-export ALONGGPX_TIMEZONE=Europe/Berlin
-python3 cli/main.py --preset camp_basic
-```
-
 **Priority (high → low):** CLI args > env vars > config.yaml
 
 ---
