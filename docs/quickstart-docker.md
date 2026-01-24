@@ -120,25 +120,6 @@ docker-compose logs --tail=50
 docker-compose logs --timestamps
 ```
 
-## Manual Build (Advanced)
-```bash
-cd docker
-docker build -t alonggpx:latest ..
-
-docker run -p 5000:5000 \
-  -v "$(pwd)/../data/input:/app/data/input:ro" \
-  -v "$(pwd)/../data/output:/app/data/output:rw" \
-  -e ALONGGPX_RADIUS_KM=5 \
-  alonggpx:latest
-```
-
-## Development & Testing
-```bash
-# Web API in development mode
-export FLASK_ENV=development
-python -m flask --app docker.app run --port 5000
-```
-
 ## Production Deployment
 ```dockerfile
 # Dockerfile snippet: use Gunicorn in production

@@ -14,7 +14,6 @@ Perfect for trip planning: bikepacking, hiking, road trips, or any adventure whe
 
 - CLI quickstart → [docs/quickstart-cli.md](docs/quickstart-cli.md)
 - Docker quickstart → [docs/quickstart-docker.md](docs/quickstart-docker.md)
-- Detailed web API → [docs/DOCKER.md](docs/DOCKER.md)
 
 ## 📁 Project Structure
 
@@ -39,8 +38,8 @@ AlongGPX/
 │   ├── export.py          # Excel export
 │   └── folium_map.py      # Map generation
 ├── docs/                   # Documentation
-│   ├── DOCKER.md          # Docker deployment guide
-│   ├── QUICKSTART.md      # Quick start guide
+│   ├── quickstart-cli.md  # CLI setup guide
+│   └── quickstart-docker.md # Docker setup guide
 ├── data/
 │   ├── input/              # GPX files (default)
 │   └── output/             # Generated results
