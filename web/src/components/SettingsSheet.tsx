@@ -146,7 +146,7 @@ export default function SettingsSheet({
 
         <section className="sheet-section">
           <div className="section-head">
-            <h3>General</h3>
+            <h3>Project Settings</h3>
           </div>
           <div className="field field-inline">
             <label htmlFor="projectName">Project name</label>
