@@ -24,6 +24,8 @@ type Props = {
   onOpenIncludeModal: () => void
   onOpenExcludeModal: () => void
   onDeletePreset: (preset: string) => void
+  onDeleteIncludeFilter: (filter: string) => void
+  onDeleteExcludeFilter: (filter: string) => void
 }
 
 export default function SettingsSheet({
@@ -41,6 +43,8 @@ export default function SettingsSheet({
   onOpenIncludeModal,
   onOpenExcludeModal,
   onDeletePreset,
+  onDeleteIncludeFilter,
+  onDeleteExcludeFilter,
 }: Props) {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -61,11 +65,11 @@ export default function SettingsSheet({
   }, [selectedFile])
 
   const deleteIncludeFilter = (filter: string) => {
-    onSettingsChange({ includes: settings.includes.filter((f) => f !== filter) })
+    onDeleteIncludeFilter(filter)
   }
 
   const deleteExcludeFilter = (filter: string) => {
-    onSettingsChange({ excludes: settings.excludes.filter((f) => f !== filter) })
+    onDeleteExcludeFilter(filter)
   }
 
   const deletePreset = (preset: string) => {

@@ -259,6 +259,92 @@ function DevApp() {
     addPresetFilters(remainingPresets)
   }
 
+  const deleteIncludeFilterFromChip = (filter: string) => {
+    // Find which presets contain this filter
+    const presetsToRemove = settings.presets.filter((p) => {
+      const presetFilters = presetsDetail[p]?.include || []
+      return presetFilters.includes(filter)
+    })
+
+    if (presetsToRemove.length > 0) {
+      // Get all filters from these presets EXCEPT the one being deleted
+      const filtersFromRemovedPresets = presetsToRemove.flatMap(
+        (p) => presetsDetail[p]?.include || []
+      ).filter((f) => f !== filter)
+
+      // Remove the presets but keep their other filters as manual filters
+      const remainingPresets = settings.presets.filter((p) => !presetsToRemove.includes(p))
+      
+      // Get current manual filters (not from any preset)
+      const allPresetFilters = Object.values(presetsDetail).flatMap((p) => p?.include || [])
+      const currentManualFilters = settings.includes.filter((f) => !allPresetFilters.includes(f))
+      
+      // Recalculate with remaining presets, keeping other filters from removed preset as manual
+      const includesFromRemainingPresets = remainingPresets.flatMap(
+        (p) => presetsDetail[p]?.include || [],
+      )
+      const excludesFromRemainingPresets = remainingPresets.flatMap(
+        (p) => presetsDetail[p]?.exclude || [],
+      )
+      
+      setSettings((prev) => ({
+        ...prev,
+        presets: remainingPresets,
+        includes: Array.from(new Set([...currentManualFilters, ...filtersFromRemovedPresets, ...includesFromRemainingPresets])),
+        excludes: Array.from(new Set([...prev.excludes.filter((f) => !allPresetFilters.includes(f)), ...excludesFromRemainingPresets])),
+      }))
+    } else {
+      // Filter was manually added, just remove it
+      setSettings((prev) => ({
+        ...prev,
+        includes: prev.includes.filter((f) => f !== filter),
+      }))
+    }
+  }
+
+  const deleteExcludeFilterFromChip = (filter: string) => {
+    // Find which presets contain this filter
+    const presetsToRemove = settings.presets.filter((p) => {
+      const presetFilters = presetsDetail[p]?.exclude || []
+      return presetFilters.includes(filter)
+    })
+
+    if (presetsToRemove.length > 0) {
+      // Get all filters from these presets EXCEPT the one being deleted
+      const filtersFromRemovedPresets = presetsToRemove.flatMap(
+        (p) => presetsDetail[p]?.exclude || []
+      ).filter((f) => f !== filter)
+
+      // Remove the presets but keep their other filters as manual filters
+      const remainingPresets = settings.presets.filter((p) => !presetsToRemove.includes(p))
+      
+      // Get current manual filters (not from any preset)
+      const allPresetFilters = Object.values(presetsDetail).flatMap((p) => p?.exclude || [])
+      const currentManualFilters = settings.excludes.filter((f) => !allPresetFilters.includes(f))
+      
+      // Recalculate with remaining presets, keeping other filters from removed preset as manual
+      const includesFromRemainingPresets = remainingPresets.flatMap(
+        (p) => presetsDetail[p]?.include || [],
+      )
+      const excludesFromRemainingPresets = remainingPresets.flatMap(
+        (p) => presetsDetail[p]?.exclude || [],
+      )
+      
+      setSettings((prev) => ({
+        ...prev,
+        presets: remainingPresets,
+        includes: Array.from(new Set([...prev.includes.filter((f) => !allPresetFilters.includes(f)), ...includesFromRemainingPresets])),
+        excludes: Array.from(new Set([...currentManualFilters, ...filtersFromRemovedPresets, ...excludesFromRemainingPresets])),
+      }))
+    } else {
+      // Filter was manually added, just remove it
+      setSettings((prev) => ({
+        ...prev,
+        excludes: prev.excludes.filter((f) => f !== filter),
+      }))
+    }
+  }
+
   return (
     <div className="dev-app">
       <BrandingHeader title="alongGPX" subtitle="Plan smarter along your track" />
@@ -285,6 +371,8 @@ function DevApp() {
         onOpenIncludeModal={() => openFilterModal('include')}
         onOpenExcludeModal={() => openFilterModal('exclude')}
         onDeletePreset={deletePresetFromChip}
+        onDeleteIncludeFilter={deleteIncludeFilterFromChip}
+        onDeleteExcludeFilter={deleteExcludeFilterFromChip}
       />
 
       <PresetSelectionModal
