@@ -145,3 +145,26 @@
   color: var(--color-text-secondary);
   font-size: 12px;
 }
+
+/* Mobile attribution and scale positioning */
+@media (max-width: 991px) {
+  /* Keep attribution on bottom left, add margin for FAB */
+  .leaflet-bottom.leaflet-right {
+    left: 10px !important;
+    right: auto !important;
+    bottom: 10px !important;
+    max-width: calc(100vw - 100px) !important; /* Leave space for FAB */
+  }
+
+  /* Ensure attribution is above map but below FAB */
+  .leaflet-control-attribution {
+    z-index: 50 !important;
+    font-size: 10px !important;
+  }
+
+  /* Position scale control above attribution with proper spacing */
+  .leaflet-control-scale {
+    margin-bottom: 8px !important;
+    z-index: 50 !important;
+  }
+}

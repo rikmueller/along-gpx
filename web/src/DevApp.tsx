@@ -99,7 +99,7 @@ function DevApp() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [trackData, setTrackData] = useState<[number, number][]>([])
   const [poiData, setPoiData] = useState<MapPoi[]>([])
-  const [sheetOpen, setSheetOpen] = useState(true)
+  const [sheetOpen, setSheetOpen] = useState(() => window.innerWidth >= 992)
   const [tileId, setTileId] = useState<string>(loadTilePreference())
 
   const [settings, setSettings] = useState({

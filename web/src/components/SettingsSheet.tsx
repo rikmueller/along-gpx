@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef } from 'react'
-import { Sheet, MapPin } from 'lucide-react'
+import { Sheet, MapPin, X, Settings } from 'lucide-react'
 import { JobStatus } from '../api'
 import './SettingsSheet.css'
 
@@ -76,8 +76,30 @@ export default function SettingsSheet({
     onDeletePreset(preset)
   }
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onToggle()
+    }
+  }
+
   return (
     <>
+      {/* Mobile FAB - only visible on mobile when closed */}
+      {!open && (
+        <button
+          className="sheet-fab-mobile"
+          onClick={onToggle}
+          aria-label="Open settings"
+          title="Open settings"
+        >
+          <Settings size={24} />
+        </button>
+      )}
+
+      {/* Mobile backdrop */}
+      {open && <div className="sheet-backdrop-mobile" onClick={handleBackdropClick} />}
+
+      {/* Desktop toggle button */}
       {!open && (
         <button
           className="sheet-toggle"
@@ -90,6 +112,7 @@ export default function SettingsSheet({
       )}
 
       <aside className={`sheet ${open ? 'open' : 'closed'}`}>
+        {/* Desktop collapse button */}
         {open && (
           <button
             className="sheet-collapse-btn in-panel"
@@ -100,6 +123,21 @@ export default function SettingsSheet({
             ›
           </button>
         )}
+
+        {/* Mobile header bar with close button */}
+        <div className="sheet-mobile-header">
+          <h2 className="sheet-mobile-title">Settings</h2>
+          <button
+            className="sheet-mobile-close"
+            onClick={onToggle}
+            aria-label="Close settings"
+            title="Close settings"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Mobile grabber - hidden but kept for desktop */}
         <div className="sheet-grabber" onClick={onToggle} aria-label="Toggle controls">
           <div className="grab-handle" />
         </div>
