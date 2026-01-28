@@ -10,6 +10,13 @@
   pointer-events: none;
 }
 
+/* On mobile, increase z-index to be visible above map */
+@media (max-width: 991px) {
+  .branding-header {
+    z-index: 185; /* Above map (176) and FAB (180), below sheet (190) */
+  }
+}
+
 .branding-glass {
   display: inline-flex;
   align-items: center;
