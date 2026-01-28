@@ -156,6 +156,13 @@ function DevApp() {
   // WebSocket subscription for live progress
   useWebSocket(jobId, handleJobUpdate)
 
+  // Close settings sheet on mobile when processing completes
+  useEffect(() => {
+    if (jobStatus && jobStatus.state === 'completed' && window.innerWidth < 992) {
+      setSheetOpen(false)
+    }
+  }, [jobStatus])
+
   // Load config
   useEffect(() => {
     const load = async () => {
