@@ -37,8 +37,8 @@ def load_env_config() -> dict:
     - ALONGGPX_SEARCH_EXCLUDE (semicolon-separated)
     - ALONGGPX_HOSTNAME (for Vite allowedHosts / HMR)
     """
-    # Load config/.env file if present
-    config_env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', '.env')
+    # Load cli/.env file if present
+    config_env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cli', '.env')
     load_dotenv(config_env_path)
     
     env_cfg = {}

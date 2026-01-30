@@ -4,10 +4,12 @@ import react from '@vitejs/plugin-react'
 import dotenv from 'dotenv'
 import { resolve } from 'path'
 
-// Load web/.env.local for local development overrides
-const localEnv = dotenv.config({ path: resolve(__dirname, '.env.local') }).parsed || {}
-// Load web/.env for shared web configuration
+// Load cli/.env for shared base configuration
+const cliEnv = dotenv.config({ path: resolve(__dirname, '..', 'cli', '.env') }).parsed || {}
+// Load web/.env for web-specific configuration (overrides cli/.env)
 const webEnv = dotenv.config({ path: resolve(__dirname, '.env') }).parsed || {}
+// Load web/.env.local for local development overrides (highest priority)
+const localEnv = dotenv.config({ path: resolve(__dirname, '.env.local') }).parsed || {}
 
 const parseHosts = (value?: string) =>
   value
@@ -33,7 +35,7 @@ const buildClientEnv = (vars: Record<string, string>) => {
 
 export default defineConfig(({ mode }) => {
   const viteEnv = loadEnv(mode, process.cwd(), '')
-  const env = { ...webEnv, ...viteEnv, ...localEnv, ...process.env }
+  const env = { ...cliEnv, ...webEnv, ...viteEnv, ...localEnv, ...process.env }
 
   const allowedHosts = parseHosts(env.VITE_ALLOWED_HOSTS || env.ALONGGPX_HOSTNAME) || ['.']
   const hmrHost = env.ALONGGPX_HOSTNAME || env.VITE_HMR_HOST

@@ -13,6 +13,7 @@ import uuid
 import re
 import time
 from datetime import datetime
+from dotenv import load_dotenv
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -100,6 +101,10 @@ def load_config_from_env() -> dict:
     Load configuration from environment variables only.
     No YAML files, no complex merging - just pure environment variables with defaults.
     """
+    # Load cli/.env file if present (for local development)
+    cli_env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cli', '.env')
+    load_dotenv(cli_env_path)
+    
     config = {
         'project': {
             'name': os.getenv('ALONGGPX_PROJECT_NAME', 'AlongGPX'),
