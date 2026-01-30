@@ -6,7 +6,6 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgeos-dev \
-    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy backend requirements
@@ -32,7 +31,6 @@ WORKDIR /app
 # Install only runtime system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgeos-c1v5 \
-    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy from base stage
