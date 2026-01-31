@@ -307,9 +307,117 @@ sudo netstat -tulpn | grep 3000
 
 ```bash
 # Fix output directory permissions
-sudo chmod 755 data/output
-sudo chown -R $(id -u):$(id -g) data/output
+sudo chown -R 1000:1000 data/
 ```
+
+### Setting Up SSL/HTTPS
+
+To use HTTPS instead of HTTP (port 80):
+
+1. **Prepare your SSL certificate and key on the host:**
+
+```bash
+# Place files in a directory (e.g., /etc/ssl/along-gpx/)
+ls -la /etc/ssl/along-gpx/
+# Expected:
+# - certificate.cer (or .pem)
+# - private.key
+```
+
+2. **Mount the certificate directory into nginx:**
+
+Edit `docker-compose.yml`:
+
+```yaml
+services:
+  nginx:
+    # ... existing config ...
+    ports:
+      - "80:80"      # HTTP redirect
+      - "443:443"    # HTTPS
+    volumes:
+      - /path-to-certfiles:/path-to-certfiles:ro
+    # ... rest of config ...
+```
+
+3. **Update nginx.conf:**
+
+Edit `deployment/nginx.conf`:
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 80;
+    server_name your-domain.example;
+    return 301 https://$host$request_uri;  # Redirect HTTP to HTTPS
+}
+
+server {
+    listen 443 ssl;
+    server_name your-domain.example;
+
+    ssl_certificate     /path-to-certfile/certificate.cer;
+    ssl_certificate_key /path-to-keyfile/private.key;
+
+    # Frontend static files
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # WebSocket for job progress
+    location /socket.io/ {
+        proxy_pass http://backend:5000/socket.io/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+
+    # Backend API
+    location /api/ {
+        proxy_pass http://backend:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Health check
+    location /health {
+        proxy_pass http://backend:5000/health;
+        proxy_http_version 1.1;
+    }
+}
+```
+
+4. **Ensure cert/key are readable:**
+
+```bash
+chmod 644 /etc/ssl/along-gpx/certificate.cer
+chmod 644 /etc/ssl/along-gpx/private.key
+```
+
+5. **Restart services:**
+
+```bash
+docker compose down
+docker compose up --build -d
+```
+
+**Notes:**
+- The volume mount **must be on the `nginx` service**, not `backend`
+- Certificate formats supported: PEM (`.pem`, `.crt`) and DER (`.cer`)
+- If using Let's Encrypt (Certbot), mount `/etc/letsencrypt` instead
+- Port 443 must be open on your host firewall
 
 ### Overpass API Timeouts
 
