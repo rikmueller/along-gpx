@@ -303,6 +303,10 @@ function DevApp() {
       includes: Array.from(new Set([...manualIncludes, ...includesFromPresets])),
       excludes: Array.from(new Set([...manualExcludes, ...excludesFromPresets])),
     }))
+    // Clear error when presets are added
+    if (selectedPresets.length > 0 || manualIncludes.length > 0) {
+      setError(null)
+    }
   }
 
   const deletePresetFromChip = (preset: string) => {
@@ -447,6 +451,11 @@ function DevApp() {
             ...prev,
             [filterModalMode === 'include' ? 'includes' : 'excludes']: filters,
           }))
+          // Clear error only if we have includes or presets (not just excludes)
+          const newIncludes = filterModalMode === 'include' ? filters : settings.includes
+          if (newIncludes.length > 0 || settings.presets.length > 0) {
+            setError(null)
+          }
           closeFilterModal()
         }}
       />
