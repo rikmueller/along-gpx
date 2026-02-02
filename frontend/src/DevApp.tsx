@@ -278,8 +278,8 @@ function DevApp() {
       if (window.innerWidth < 992) {
         setSheetOpen(false)
         setNotification('Please place the marker at the desired position and open the settings again.')
-        // Auto-dismiss notification after 4 seconds
-        const timer = setTimeout(() => setNotification(null), 4000)
+        // Auto-dismiss notification after 5 seconds
+        const timer = setTimeout(() => setNotification(null), 5000)
         return () => clearTimeout(timer)
       }
     }
@@ -495,9 +495,9 @@ function DevApp() {
       {notification && (
         <div style={{
           position: 'fixed',
-          top: '65%',
+          top: '52%',
           left: '50%',
-          transform: 'translate(-50%, -50%)',
+          transform: 'translateX(-50%)',
           background: 'white',
           color: '#1f2937',
           padding: '12px 16px',
@@ -507,7 +507,6 @@ function DevApp() {
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           maxWidth: '90vw',
           textAlign: 'center',
-          animation: 'slideDown 0.3s ease-out'
         }}>
           {notification}
         </div>

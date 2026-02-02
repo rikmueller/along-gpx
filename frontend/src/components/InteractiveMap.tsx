@@ -312,12 +312,6 @@ function RecenterButton({ track, pois, markerPosition }: { track: [number, numbe
     pois.forEach((p) => points.push([p.coords[1], p.coords[0]]))
     if (markerPosition) points.push([markerPosition[0], markerPosition[1]])
     
-    // If only one point (just marker), use setView instead of fitBounds
-    if (points.length === 1) {
-      map.setView(points[0] as L.LatLngExpression, 14, { animate: true })
-      return
-    }
-    
     const bounds = L.latLngBounds(points as L.LatLngExpression[])
     
     // Force recalculation of map size (crucial for mobile)
@@ -331,7 +325,7 @@ function RecenterButton({ track, pois, markerPosition }: { track: [number, numbe
       map.fitBounds(bounds, {
         paddingTopLeft: [padLeft, padTop],
         paddingBottomRight: [padRight, padBottom],
-        maxZoom: 14, // Prevent excessive zoom-in on mobile
+        maxZoom: 14, // Prevent excessive zoom-in on mobile (applies to single points too)
         animate: true,
       })
     }, 10)
@@ -585,9 +579,19 @@ export default function InteractiveMap({ track, pois, markerPosition, onMarkerCh
     
     useEffect(() => {
       if (inputMode === 'marker' && markerPosition === null) {
-        // Just switched to marker mode without a marker - place at map center
+        // Just switched to marker mode without a marker - place at visible center (accounting for sidebar)
         const center = map.getCenter()
-        onMarkerChange([center.lat, center.lng])
+        const { occLeft, occRight } = computePadding()
+        
+        // Calculate pixel offset to shift marker away from sidebar (positive = shift right)
+        const offsetX = (occLeft - occRight) / 2
+        
+        // Convert center to container pixels, apply offset, convert back to lat/lng
+        const centerPoint = map.latLngToContainerPoint(center)
+        const offsetPoint = L.point(centerPoint.x + offsetX, centerPoint.y)
+        const adjustedCenter = map.containerPointToLatLng(offsetPoint)
+        
+        onMarkerChange([adjustedCenter.lat, adjustedCenter.lng])
       }
     }, [inputMode, markerPosition, onMarkerChange, map])
     
