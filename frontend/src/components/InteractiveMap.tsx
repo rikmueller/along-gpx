@@ -579,19 +579,9 @@ export default function InteractiveMap({ track, pois, markerPosition, onMarkerCh
     
     useEffect(() => {
       if (inputMode === 'marker' && markerPosition === null) {
-        // Just switched to marker mode without a marker - place at visible center (accounting for sidebar)
+        // Just switched to marker mode without a marker - place at map center
         const center = map.getCenter()
-        const { occLeft, occRight } = computePadding()
-        
-        // Calculate pixel offset to shift marker away from sidebar (positive = shift right)
-        const offsetX = (occLeft - occRight) / 2
-        
-        // Convert center to container pixels, apply offset, convert back to lat/lng
-        const centerPoint = map.latLngToContainerPoint(center)
-        const offsetPoint = L.point(centerPoint.x + offsetX, centerPoint.y)
-        const adjustedCenter = map.containerPointToLatLng(offsetPoint)
-        
-        onMarkerChange([adjustedCenter.lat, adjustedCenter.lng])
+        onMarkerChange([center.lat, center.lng])
       }
     }, [inputMode, markerPosition, onMarkerChange, map])
     
