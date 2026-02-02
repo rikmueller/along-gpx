@@ -16,6 +16,10 @@ type Props = {
   onSettingsChange: (changes: Partial<Props['settings']>) => void
   onFileSelected: (file: File | null) => void
   selectedFile: File | null
+  inputMode: 'track' | 'marker'
+  markerPosition: [number, number] | null
+  onClearMarker: () => void
+  onToggleMarkerMode: () => void
   onStart: () => void
   status: JobStatus | null
   error: string | null
@@ -37,6 +41,10 @@ export default function SettingsSheet({
   onSettingsChange,
   onFileSelected,
   selectedFile,
+  inputMode,
+  markerPosition,
+  onClearMarker,
+  onToggleMarkerMode,
   onStart,
   status,
   error,
@@ -218,9 +226,39 @@ export default function SettingsSheet({
           
         </section>
 
+        {/* Input Mode Segmented Control */}
         <section className="sheet-section">
           <div className="section-head">
-            <h3>GPX-Track</h3>
+            <h3>Input Mode</h3>
+          </div>
+          <div className="segmented-control">
+            <button
+              className={`segmented-option ${inputMode === 'track' ? 'active' : ''}`}
+              onClick={() => {
+                if (inputMode !== 'track') {
+                  onToggleMarkerMode()
+                }
+              }}
+            >
+              GPX Track
+            </button>
+            <button
+              className={`segmented-option ${inputMode === 'marker' ? 'active' : ''}`}
+              onClick={() => {
+                if (inputMode !== 'marker') {
+                  onToggleMarkerMode()
+                }
+              }}
+            >
+              Map Marker
+            </button>
+          </div>
+        </section>
+
+        {inputMode === 'track' && (
+        <section className="sheet-section">
+          <div className="section-head">
+            <h3>GPX Track</h3>
             {selectedFile ? (
               <span className="chip">
                 {selectedFile.name}
@@ -238,7 +276,12 @@ export default function SettingsSheet({
             )}
           </div>
           <label className="upload-tile">
-            <input ref={fileInputRef} type="file" accept=".gpx" onChange={handleFileChange} />
+            <input 
+              ref={fileInputRef} 
+              type="file" 
+              accept=".gpx" 
+              onChange={handleFileChange}
+            />
             <div className="upload-body">
               <div className="upload-icon">^</div>
               <div>
@@ -248,6 +291,35 @@ export default function SettingsSheet({
             </div>
           </label>
         </section>
+        )}
+
+        {inputMode === 'marker' && (
+        <section className="sheet-section">
+          <div className="section-head">
+            <h3>Map Marker</h3>
+            {markerPosition ? (
+              <span className="chip">
+                {markerPosition[0].toFixed(4)}°N, {markerPosition[1].toFixed(4)}°E
+                <button
+                  className="chip-delete"
+                  onClick={onClearMarker}
+                  aria-label="Clear marker"
+                  title="Clear marker"
+                >
+                  ×
+                </button>
+              </span>
+            ) : (
+              <span className="muted">No marker placed</span>
+            )}
+          </div>
+          <div style={{ padding: '1rem', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>
+            <p style={{ margin: 0 }}>
+              Click on the map to place a marker, or drag the marker to reposition it.
+            </p>
+          </div>
+        </section>
+        )}
 
         <section className="sheet-section">
           <div className="section-head">

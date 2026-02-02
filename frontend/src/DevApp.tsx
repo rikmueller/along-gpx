@@ -96,9 +96,12 @@ function DevApp() {
   const [jobId, setJobId] = useState<string | null>(null)
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [notification, setNotification] = useState<string | null>(null)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [trackData, setTrackData] = useState<[number, number][]>([])
   const [poiData, setPoiData] = useState<MapPoi[]>([])
+  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null)
+  const [inputMode, setInputMode] = useState<'track' | 'marker'>('track')
   const [sheetOpen, setSheetOpen] = useState(() => window.innerWidth >= 992)
   const [tileId, setTileId] = useState<string>(loadTilePreference())
   const [pulseFab, setPulseFab] = useState(() => window.innerWidth < 992)
@@ -214,6 +217,8 @@ function DevApp() {
     try {
       const trackPoints = await parseGPXFile(file)
       setTrackData(trackPoints)
+      setMarkerPosition(null) // Clear marker when track uploaded
+      setInputMode('track')
       setError(null) // Clear any previous errors
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to parse GPX file - please check file format'
@@ -226,11 +231,62 @@ function DevApp() {
     setSettings((prev) => ({ ...prev, ...changes }))
   }
 
-  const handleStart = async () => {
-    if (!uploadedFile) {
-      setError('Please upload a GPX file')
-      return
+  const handleMarkerChange = (position: [number, number] | null) => {
+    setMarkerPosition(position)
+    if (position) {
+      setTrackData([]) // Clear track when marker placed
+      setUploadedFile(null)
+      setInputMode('marker')
+      setError(null)
     }
+  }
+
+  const handleClearMarker = () => {
+    setMarkerPosition(null)
+    setInputMode('track')
+  }
+
+  const handleToggleMarkerMode = () => {
+    if (inputMode === 'marker') {
+      // Disable marker mode - clear marker and track, switch to track mode
+      setMarkerPosition(null)
+      setTrackData([])
+      setInputMode('track')
+      setError(null)
+    } else {
+      // Enable marker mode - switch to marker mode (marker position will be set by map center)
+      // Clear track and uploaded file
+      setMarkerPosition(null) // Will be set by InteractiveMap based on current map center
+      setTrackData([])
+      setUploadedFile(null)
+      setInputMode('marker')
+      setError(null)
+      
+      // On mobile, close settings panel so user can see the map and marker
+      if (window.innerWidth < 992) {
+        setSheetOpen(false)
+        setNotification('Please place the marker in the desired position and open the settings again.')
+        // Auto-dismiss notification after 4 seconds
+        const timer = setTimeout(() => setNotification(null), 4000)
+        return () => clearTimeout(timer)
+      }
+    }
+  }
+
+  const handleStart = async () => {
+    // Validate input based on mode
+    if (inputMode === 'track') {
+      if (!uploadedFile) {
+        setError('Please upload a GPX file')
+        return
+      }
+    } else if (inputMode === 'marker') {
+      if (!markerPosition) {
+        setError('Please place a marker on the map first')
+        return
+      }
+    }
+    
     if ((settings.includes || []).length === 0 && (settings.presets || []).length === 0) {
       setError('Please add at least one include filter or preset')
       return
@@ -251,6 +307,7 @@ function DevApp() {
         settings.includes,
         settings.excludes,
         settings.presets,
+        markerPosition,
       )
 
       setJobId(result.job_id)
@@ -273,6 +330,8 @@ function DevApp() {
     setTrackData([])
     setPoiData([])
     setUploadedFile(null)
+    setMarkerPosition(null)
+    setInputMode('track')
     setError(null)
     setSheetOpen(true)
     setSettings({
@@ -413,9 +472,32 @@ function DevApp() {
   return (
     <div className={`dev-app ${sheetOpen ? 'sheet-open' : 'sheet-closed'}`}>
       <BrandingHeader title="alongGPX" subtitle="Plan smarter along your track" />
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '65%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'white',
+          color: '#1f2937',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          zIndex: 170,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          maxWidth: '90vw',
+          textAlign: 'center',
+          animation: 'slideDown 0.3s ease-out'
+        }}>
+          {notification}
+        </div>
+      )}
       <InteractiveMap
         track={trackData}
         pois={poiData}
+        markerPosition={markerPosition}
+        onMarkerChange={handleMarkerChange}
+        inputMode={inputMode}
         tileSource={tileSource}
         tileOptions={TILE_SOURCES}
         onTileChange={setTileId}
@@ -428,6 +510,10 @@ function DevApp() {
         onSettingsChange={handleSettingsChange}
         onFileSelected={handleFileSelected}
         selectedFile={uploadedFile}
+        inputMode={inputMode}
+        markerPosition={markerPosition}
+        onClearMarker={handleClearMarker}
+        onToggleMarkerMode={handleToggleMarkerMode}
         onStart={handleStart}
         status={jobStatus}
         error={error}

@@ -30,6 +30,9 @@ export type MapPoi = {
 type Props = {
   track: [number, number][]
   pois: MapPoi[]
+  markerPosition: [number, number] | null
+  onMarkerChange: (position: [number, number] | null) => void
+  inputMode: 'track' | 'marker'
   tileSource: TileSource
   tileOptions: TileSource[]
   onTileChange: (id: string) => void
@@ -277,17 +280,27 @@ function FitBounds({ track, pois }: { track: [number, number][]; pois: MapPoi[] 
   return null
 }
 
-function RecenterButton({ track, pois }: { track: [number, number][]; pois: MapPoi[] }) {
+function RecenterButton({ track, pois, markerPosition }: { track: [number, number][]; pois: MapPoi[]; markerPosition: [number, number] | null }) {
   const map = useMap()
   const hasTrack = track.length > 0
   const hasPois = pois.length > 0
-  const hasAny = hasTrack || hasPois
+  const hasMarker = markerPosition !== null
+  const hasAny = hasTrack || hasPois || hasMarker
 
-  const handleRecenter = () => {
+  const handleRecenter = (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (!hasAny) return
     const points: [number, number][] = []
     track.forEach(([lon, lat]) => points.push([lat, lon]))
     pois.forEach((p) => points.push([p.coords[1], p.coords[0]]))
+    if (markerPosition) points.push([markerPosition[0], markerPosition[1]])
+    
+    // If only one point (just marker), use setView instead of fitBounds
+    if (points.length === 1) {
+      map.setView(points[0] as L.LatLngExpression, 14, { animate: true })
+      return
+    }
+    
     const bounds = L.latLngBounds(points as L.LatLngExpression[])
     
     // Force recalculation of map size (crucial for mobile)
@@ -344,7 +357,8 @@ function LocateButton() {
     }
   }, [map])
 
-  const handleLocate = () => {
+  const handleLocate = (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (isLocating) return
     setIsLocating(true)
     map.locate({
@@ -421,29 +435,96 @@ function TileSelector({ tileOptions, value, onChange }: { tileOptions: TileSourc
   )
 }
 
-export default function InteractiveMap({ track, pois, tileSource, tileOptions, onTileChange }: Props) {
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lon: number) => void }) {
+  const map = useMap()
+
+  useEffect(() => {
+    const handleClick = (e: L.LeafletMouseEvent) => {
+      // Ignore clicks on buttons or control elements
+      const target = e.originalEvent?.target as HTMLElement
+      if (target && (target.closest('button') || target.closest('.leaflet-control'))) {
+        return
+      }
+      onMapClick(e.latlng.lat, e.latlng.lng)
+    }
+
+    map.on('click', handleClick)
+
+    return () => {
+      map.off('click', handleClick)
+    }
+  }, [map, onMapClick])
+
+  return null
+}
+
+export default function InteractiveMap({ track, pois, markerPosition, onMarkerChange, inputMode, tileSource, tileOptions, onTileChange }: Props) {
   const initialCenter: [number, number] = [49.0069, 8.4037] // fallback Karlsruhe
   const [colorPalette, setColorPalette] = useState<string[]>(DEFAULT_COLOR_PALETTE)
+  const [trackColor, setTrackColor] = useState<string>('#2563eb')
+  const markerRef = useRef<L.Marker>(null)
 
-  // Load color palette from config on mount
+  // Handle map click to place or reposition marker
+  const handleMapClick = (lat: number, lon: number) => {
+    // In marker mode, clicking map places or repositions marker
+    if (inputMode === 'marker') {
+      onMarkerChange([lat, lon])
+    }
+  }
+
+  // Handle marker drag to update position
+  const handleMarkerDrag = () => {
+    if (markerRef.current) {
+      const pos = markerRef.current.getLatLng()
+      onMarkerChange([pos.lat, pos.lng])
+    }
+  }
+
+  // Create marker icon using track color
+  const markerIcon = useMemo(() => {
+    // Map track color to supported marker color
+    const colorMap: Record<string, string> = {
+      '#2563eb': 'blue',
+      '#dc2626': 'red',
+      '#16a34a': 'green',
+      '#ea580c': 'orange',
+      '#f59e0b': 'gold',
+      '#eab308': 'yellow',
+      '#8b5cf6': 'violet',
+      '#6b7280': 'grey',
+      'blue': 'blue',
+      'red': 'red',
+      'green': 'green',
+      'orange': 'orange',
+      'gold': 'gold',
+      'yellow': 'yellow',
+      'violet': 'violet',
+      'grey': 'grey',
+    }
+    const markerColor = colorMap[trackColor.toLowerCase()] || 'blue'
+    return createColoredIcon(markerColor, 'blue')
+  }, [trackColor])
+
+  // Load color palette and track color from config on mount
   useEffect(() => {
-    const loadPalette = async () => {
+    const loadConfig = async () => {
       try {
         const config = await apiClient.getConfig()
-        // The config response includes presets_detail with marker_color_palette data
-        if (config.defaults && config as any) {
-          // Extract palette from config - look for it in the response
-          const response = config as any
-          if (response.marker_color_palette && Array.isArray(response.marker_color_palette)) {
-            setColorPalette(response.marker_color_palette)
-          }
+        // Extract palette and track color from config
+        const response = config as any
+        if (response.marker_color_palette && Array.isArray(response.marker_color_palette)) {
+          setColorPalette(response.marker_color_palette)
+        }
+        if (response.track_color) {
+          setTrackColor(response.track_color)
         }
       } catch (err) {
-        console.debug('Could not load config palette, using defaults', err)
+        console.debug('Could not load config, using defaults', err)
         setColorPalette(DEFAULT_COLOR_PALETTE)
+        setTrackColor('#2563eb')
       }
     }
-    loadPalette()
+    loadConfig()
   }, [])
 
   // Automatic geolocation detection disabled to prevent browser popup
@@ -461,6 +542,21 @@ export default function InteractiveMap({ track, pois, tileSource, tileOptions, o
     return map
   }, [pois, colorPalette])
 
+  // Helper component to center marker on map when switching to marker mode
+  function MarkerModeSwitchHandler({ onMarkerChange, inputMode, markerPosition }: { onMarkerChange: (pos: [number, number]) => void; inputMode: string; markerPosition: [number, number] | null }) {
+    const map = useMap()
+    
+    useEffect(() => {
+      if (inputMode === 'marker' && markerPosition === null) {
+        // Just switched to marker mode without a marker - place at map center
+        const center = map.getCenter()
+        onMarkerChange([center.lat, center.lng])
+      }
+    }, [inputMode, markerPosition, onMarkerChange, map])
+    
+    return null
+  }
+
   return (
     <div className="map-wrapper">
       <MapContainer
@@ -470,8 +566,31 @@ export default function InteractiveMap({ track, pois, tileSource, tileOptions, o
         zoomControl={true}
       >
         <TileLayer url={tileSource.url} attribution={tileSource.attribution} />
+        <MapClickHandler onMapClick={handleMapClick} />
+        <MarkerModeSwitchHandler onMarkerChange={onMarkerChange} inputMode={inputMode} markerPosition={markerPosition} />
+        
+        {/* User-placed marker (draggable) - only visible in marker mode */}
+        {markerPosition && inputMode === 'marker' && (
+          <Marker
+            position={[markerPosition[0], markerPosition[1]]}
+            icon={markerIcon}
+            draggable={true}
+            ref={markerRef}
+            eventHandlers={{
+              dragend: handleMarkerDrag,
+            }}
+          >
+            <Popup>
+              <div>
+                <strong>Search Center</strong><br />
+                {markerPosition[0].toFixed(5)}°N, {markerPosition[1].toFixed(5)}°E
+              </div>
+            </Popup>
+          </Marker>
+        )}
+        
         {polylineCoords.length > 0 && (
-          <Polyline positions={polylineCoords as L.LatLngExpression[]} pathOptions={{ color: '#2563eb', weight: 3 }} />
+          <Polyline positions={polylineCoords as L.LatLngExpression[]} pathOptions={{ color: trackColor, weight: 3 }} />
         )}
         {polylineCoords.length > 0 && (
           <>
@@ -559,7 +678,7 @@ export default function InteractiveMap({ track, pois, tileSource, tileOptions, o
         <FitBounds track={track} pois={pois} />
         <ScaleControl />
         <LocateButton />
-        <RecenterButton track={track} pois={pois} />
+        <RecenterButton track={track} pois={pois} markerPosition={markerPosition} />
         <TileSelector tileOptions={tileOptions} value={tileSource.id} onChange={onTileChange} />
       </MapContainer>
     </div>

@@ -241,6 +241,45 @@
   box-shadow: var(--color-shadow);
 }
 
+.subsection {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.subsection:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.subsection-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.subsection-head h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.subsection-head .muted,
+.subsection-head .chip {
+  margin-left: auto;
+}
+
+.info-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.info-text p {
+  margin: 0;
+}
+
 .section-head {
   display: flex;
   align-items: center;
@@ -396,6 +435,39 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.segmented-control {
+  display: flex;
+  gap: 0;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  width: 100%;
+}
+
+.segmented-option {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: calc(var(--radius-md) - 2px);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segmented-option:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.segmented-option.active {
+  background: white;
+  color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
 }
 
 .chip {
