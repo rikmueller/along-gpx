@@ -231,6 +231,7 @@ def run_pipeline(
         output_path=config["project"]["output_path"],
         project_name=config["project"]["name"],
         filename=excel_filename,
+        track_points=track_points,
     )
     report_progress(90, "Excel exported. Building map...")
 
