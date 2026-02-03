@@ -32,6 +32,7 @@ This directory contains configuration for **local development** with both Flask 
    ```bash
    cd frontend
    npm install
+   npm run build
    npm run dev
    # Runs on http://localhost:3000 with hot reload
    ```
