@@ -349,6 +349,13 @@
   background: #f8fbff;
 }
 
+.upload-tile.dragover {
+  border-color: var(--color-primary);
+  border-style: solid;
+  background: #f0f7ff;
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
 .upload-tile input {
   display: none;
 }
