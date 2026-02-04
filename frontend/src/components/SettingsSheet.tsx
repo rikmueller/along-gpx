@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Sheet, MapPin, X, Settings } from 'lucide-react'
 import { JobStatus } from '../api'
 import './SettingsSheet.css'
@@ -66,6 +66,29 @@ export default function SettingsSheet({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const errorRef = useRef<HTMLDivElement>(null)
+  const [dragOver, setDragOver] = useState(false)
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.name.endsWith('.gpx')) {
+      onFileSelected(file)
+    }
+  }
 
   // Clear native file input when selectedFile is reset to null
   useEffect(() => {
@@ -271,7 +294,12 @@ export default function SettingsSheet({
               <span className="muted">No track uploaded</span>
             )}
           </div>
-          <label className="upload-tile">
+          <label 
+            className={`upload-tile ${dragOver ? 'dragover' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <input 
               ref={fileInputRef} 
               type="file" 
@@ -282,7 +310,7 @@ export default function SettingsSheet({
               <div className="upload-icon">^</div>
               <div>
                 <div className="upload-title">Drop or click to upload</div>
-                <div className="muted">GPX only, max 50MB</div>
+                <div className="muted">GPX only, max 5MB</div>
               </div>
             </div>
           </label>
