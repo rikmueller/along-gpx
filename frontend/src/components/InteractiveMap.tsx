@@ -508,7 +508,7 @@ function TileSelector({ tileOptions, value, onChange }: { tileOptions: TileSourc
   )
 }
 
-function MapViewPersistence({ signature, onRestored }: { signature: string; onRestored: (sig: string | null) => void }) {
+function MapViewPersistence({ signature }: { signature: string }) {
   const map = useMap()
   const restoredRef = useRef(false)
 
@@ -520,8 +520,7 @@ function MapViewPersistence({ signature, onRestored }: { signature: string; onRe
     if (savedSig && signature && savedSig !== signature) return
     map.setView(savedView.center, savedView.zoom, { animate: false })
     restoredRef.current = true
-    onRestored(savedSig || null)
-  }, [map, signature, onRestored])
+  }, [map, signature])
 
   useEffect(() => {
     const persist = () => {
@@ -572,7 +571,6 @@ export default function InteractiveMap({ track, pois, markerPosition, onMarkerCh
   const [colorPalette, setColorPalette] = useState<string[]>(DEFAULT_COLOR_PALETTE)
   const [trackColor, setTrackColor] = useState<string>('#2563eb')
   const markerRef = useRef<L.Marker>(null)
-  const [restoredSignature, setRestoredSignature] = useState<string | null>(null)
 
   // Determine if marker should be locked (during processing or after completion, but not on failure)
   const isMarkerLocked = jobStatus && (
@@ -700,7 +698,7 @@ export default function InteractiveMap({ track, pois, markerPosition, onMarkerCh
       >
         <TileLayer url={tileSource.url} attribution={tileSource.attribution} />
         <MapClickHandler onMapClick={handleMapClick} />
-        <MapViewPersistence signature={mapSignature} onRestored={setRestoredSignature} />
+        <MapViewPersistence signature={mapSignature} />
         
         {/* User-placed marker (draggable) - only visible in marker mode */}
         {markerPosition && inputMode === 'marker' && (
