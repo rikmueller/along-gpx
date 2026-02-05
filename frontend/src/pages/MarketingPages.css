@@ -96,6 +96,10 @@
   margin-bottom: 32px;
 }
 
+.marketing-steps-full {
+  grid-template-columns: 1fr;
+}
+
 @media (max-width: 768px) {
   .marketing-steps {
     grid-template-columns: 1fr;
