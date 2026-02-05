@@ -47,32 +47,20 @@
 
 .marketing-footer {
   border-top: 1px solid var(--wa-border-subtle);
-  padding: 24px 20px 40px;
+  padding: 16px 0 16px 20px;
   color: var(--wa-text-muted);
-}
-
-.marketing-footer-inner {
-  max-width: 1120px;
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.marketing-footer-links {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.marketing-footer-links a {
-  color: var(--wa-text-muted);
-  text-decoration: none;
   font-size: 0.9rem;
 }
 
-.marketing-footer-links a:hover {
+.marketing-footer-inner {
+  text-align: left;
+}
+
+.marketing-footer a {
+  color: var(--wa-text-muted);
+  text-decoration: none;
+}
+
+.marketing-footer a:hover {
   color: var(--wa-text);
 }

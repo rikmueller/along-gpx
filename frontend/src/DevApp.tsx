@@ -490,9 +490,9 @@ function DevApp() {
       <SeoMeta
         title="Map | WhatsAround"
         description="Run POI searches with custom filters, view results on a live map, and export Excel or HTML maps."
-        url="https://getwhatsaround.app/map"
+        url="https://getwhatsaround.app/app"
       />
-      <Header logoHref="/map" />
+      <Header logoHref="/app" />
       {notification && (
         <div style={{
           position: 'fixed',

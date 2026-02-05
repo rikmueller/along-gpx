@@ -47,10 +47,10 @@ export default function FeaturesPage() {
         <div className="marketing-cta-panel">
           <div>
             <h3>See it in action</h3>
-            <p>Open the app and run your first search in minutes.</p>
+            <p>Open the App and run your first search in minutes.</p>
           </div>
-          <Link to="/map" className="marketing-button primary">
-            Open the map
+          <Link to="/app" className="marketing-button primary">
+            Open App
           </Link>
         </div>
       </section>

@@ -55,9 +55,6 @@ export default function BrandingHeader({
                   <Link to="/how-it-works" className={`branding-menu-item ${location.pathname === '/how-it-works' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
                     How it works
                   </Link>
-                  <Link to="/about" className={`branding-menu-item ${location.pathname === '/about' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
-                    About
-                  </Link>
                 </div>
               )}
             </div>

@@ -5,22 +5,31 @@
 }
 
 .marketing-hero {
-  display: grid;
-  gap: 24px;
-  padding: 72px 20px 24px;
-  max-width: 1120px;
-  margin: 0 auto;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.marketing-container.marketing-hero {
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 .marketing-hero h1 {
   font-size: clamp(2.2rem, 4vw, 3.6rem);
   line-height: 1.1;
   color: var(--wa-hero-title);
+  margin: 0 0 24px 0;
+  width: 100%;
+  display: block;
 }
 
 .marketing-hero p {
   font-size: 1.1rem;
   color: var(--wa-hero-text);
+  margin: 0 0 24px 0;
+  width: 100%;
+  display: block;
 }
 
 .marketing-hero-actions {
@@ -82,7 +91,15 @@
 
 .marketing-steps {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 768px) {
+  .marketing-steps {
+    grid-template-columns: 1fr;
+  }
 }
 
 .marketing-step {

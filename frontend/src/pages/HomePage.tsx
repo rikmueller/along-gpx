@@ -11,12 +11,17 @@ export default function HomePage() {
         description="Discover points of interest near you or along any route. Find restaurants, shops, accommodations, services and attractions using OpenStreetMap data."
         url="https://getwhatsaround.app/"
       />
-      <section className="marketing-hero">
+      <section className="marketing-container marketing-hero">
         <h1>Plan smarter with nearby insights.</h1>
         <p>
           WhatsAround helps you discover points of interest along any route or around any location.
           Search, filter, and organize results in seconds — then export maps and spreadsheets when you need them.
         </p>
+        <div className="marketing-hero-actions">
+          <Link to="/app" className="marketing-button primary">
+            Open App
+          </Link>
+        </div>
       </section>
 
       <section className="marketing-container">
@@ -46,15 +51,19 @@ export default function HomePage() {
             <h3>Export tools</h3>
             <p>Download Excel files and interactive HTML maps for offline use or sharing.</p>
           </div>
+          <div className="marketing-card">
+            <h3>Free & open-source</h3>
+            <p>Built with open data from OpenStreetMap and powered by the Overpass API.</p>
+          </div>
         </div>
 
         <div className="marketing-cta-panel">
           <div>
             <h3>Ready to explore?</h3>
-            <p>Open the map and run your first search in minutes.</p>
+            <p>Open the App and run your first search in minutes.</p>
           </div>
-          <Link to="/map" className="marketing-button primary">
-            Open Map
+          <Link to="/app" className="marketing-button primary">
+            Open App
           </Link>
         </div>
       </section>

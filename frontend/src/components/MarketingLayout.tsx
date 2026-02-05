@@ -16,13 +16,7 @@ export default function MarketingLayout({ children }: Props) {
 
       <footer className="marketing-footer">
         <div className="marketing-footer-inner">
-          <div>© {new Date().getFullYear()} WhatsAround</div>
-          <div className="marketing-footer-links">
-            <Link to="/home">Home</Link>
-            <Link to="/how-it-works">How it works</Link>
-            <Link to="/about">About</Link>
-            <Link to="/map">Open App</Link>
-          </div>
+          <a href="mailto:rik@getwhatsaround.app">© {new Date().getFullYear()} WhatsAround</a>
         </div>
       </footer>
     </div>

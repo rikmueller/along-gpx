@@ -138,7 +138,7 @@ export default function Header({ logoHref = '/home' }: HeaderProps) {
           <NavLink to="/home" className={({ isActive }) => `wa-nav-link ${isActive ? 'active' : ''}`}>
             Home
           </NavLink>
-          <NavLink to="/map" className={({ isActive }) => `wa-nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/app" className={({ isActive }) => `wa-nav-link ${isActive ? 'active' : ''}`}>
             App
           </NavLink>
           <NavLink to="/how-it-works" className={({ isActive }) => `wa-nav-link ${isActive ? 'active' : ''}`}>
@@ -182,7 +182,7 @@ export default function Header({ logoHref = '/home' }: HeaderProps) {
               Home
             </NavLink>
             <NavLink
-              to="/map"
+              to="/app"
               className={({ isActive }) => `wa-menu-item ${isActive ? 'active' : ''}`}
               onClick={() => setMenuOpen(false)}
             >
