@@ -14,7 +14,7 @@ This directory contains configuration for **CLI standalone usage** of WhatsAroun
    # or on Windows: venv\Scripts\activate
    
    # Install dependencies
-   pip install -r deployment/requirements-cli.txt
+   pip install -r cli/requirements-cli.txt
    ```
 
 2. **Copy the example configuration:**
