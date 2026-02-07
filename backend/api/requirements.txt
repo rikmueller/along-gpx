@@ -1,4 +1,4 @@
-# Core dependencies (from requirements-base.txt)
+# Core dependencies
 gpxpy==1.6.2
 shapely==2.1.2
 pyproj==3.7.2

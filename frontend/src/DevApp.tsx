@@ -290,6 +290,9 @@ function DevApp() {
   const [filterModalMode, setFilterModalMode] = useState<FilterModalMode>('include')
   const [confirmSearchModalOpen, setConfirmSearchModalOpen] = useState(false)
   const [confirmResetModalOpen, setConfirmResetModalOpen] = useState(false)
+  const [confirmClearModalOpen, setConfirmClearModalOpen] = useState(false)
+  const [confirmClearMode, setConfirmClearMode] = useState<'track' | 'marker' | null>(null)
+  const [pendingTrackFile, setPendingTrackFile] = useState<File | null>(null)
 
   const fetchGeoJson = useCallback(
     async (id: string) => {
@@ -448,14 +451,19 @@ function DevApp() {
     [tileId]
   )
 
-  const handleFileSelected = async (file: File | null) => {
+  const performTrackFileUpdate = async (file: File | null) => {
     setUploadedFile(file)
     setLastProcessedSettings(null) // Clear snapshot when file changes
     if (!file) {
       setTrackData([])
+      setPoiData([]) // Clear POIs from previous run
+      setJobStatus(null) // Reset job status
+      setJobId(null) // Clear job ID
+      clearResultsForMode('track') // Clear saved track results
+      setError(null)
       return
     }
-    
+
     // Parse GPX and display track immediately
     try {
       const trackPoints = await parseGPXFile(file)
@@ -471,6 +479,21 @@ function DevApp() {
       setError(message)
       setTrackData([])
     }
+  }
+
+  const hasActiveResults = useCallback(() => {
+    return jobStatus?.state === 'completed' && poiData.length > 0
+  }, [jobStatus, poiData])
+
+  const handleFileSelected = async (file: File | null) => {
+    if (inputMode === 'track' && hasActiveResults()) {
+      setPendingTrackFile(file)
+      setConfirmClearMode('track')
+      setConfirmClearModalOpen(true)
+      return
+    }
+
+    await performTrackFileUpdate(file)
   }
 
   const handleSettingsChange = (changes: Partial<typeof settings>) => {
@@ -492,7 +515,7 @@ function DevApp() {
     }
   }
 
-  const handleClearMarker = () => {
+  const performClearMarker = () => {
     setMarkerPosition(null)
     setLastProcessedSettings(null) // Clear snapshot when marker is cleared
     setPoiData([]) // Clear POIs from previous run
@@ -505,6 +528,16 @@ function DevApp() {
       setNotification('Please place the marker at the desired position and open the settings again.')
       setTimeout(() => setNotification(null), 5000)
     }
+  }
+
+  const handleClearMarker = () => {
+    if (inputMode === 'marker' && hasActiveResults()) {
+      setConfirmClearMode('marker')
+      setConfirmClearModalOpen(true)
+      return
+    }
+
+    performClearMarker()
   }
 
   const handleToggleMarkerMode = () => {
@@ -659,6 +692,29 @@ function DevApp() {
 
   const handleCancelReset = () => {
     setConfirmResetModalOpen(false)
+  }
+
+  const handleConfirmClear = async () => {
+    setConfirmClearModalOpen(false)
+    const mode = confirmClearMode
+    setConfirmClearMode(null)
+
+    if (mode === 'track') {
+      const file = pendingTrackFile
+      setPendingTrackFile(null)
+      await performTrackFileUpdate(file)
+      return
+    }
+
+    if (mode === 'marker') {
+      performClearMarker()
+    }
+  }
+
+  const handleCancelClear = () => {
+    setConfirmClearModalOpen(false)
+    setConfirmClearMode(null)
+    setPendingTrackFile(null)
   }
 
   const openPresetModal = () => setPresetModalOpen(true)
@@ -948,6 +1004,28 @@ function DevApp() {
       >
         <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>
           This will clear all data including saved results, settings, and uploads. Do you want to continue?
+        </p>
+      </Modal>
+
+      <Modal
+        open={confirmClearModalOpen}
+        title="Clear Previous Results?"
+        onClose={handleCancelClear}
+        footer={
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button className="btn btn-secondary btn-compact" onClick={handleCancelClear}>
+              Cancel
+            </button>
+            <button className="btn btn-primary btn-compact" onClick={handleConfirmClear}>
+              OK
+            </button>
+          </div>
+        }
+      >
+        <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>
+          {confirmClearMode === 'marker'
+            ? 'Clearing the map marker will remove previous Map Marker results. Do you want to continue?'
+            : 'Removing or replacing the GPX track will clear previous GPX results. Do you want to continue?'}
         </p>
       </Modal>
     </div>
